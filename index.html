@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Trancing chalenge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        font-family: "Vazirmatn";
+      }
+      body {
+        font-family: "Vazirmatn";
+        background: #f4f6f9;
+        margin: 0;
+        padding: 20px;
+      }
+      h1,
+      h2 {
+        text-align: center;
+      }
+      .counter {
+        font-size: 1.5rem;
+        margin: 20px auto;
+        text-align: center;
+        background: linear-gradient(to left top, #e99958,#72eff8);
+        padding: 10px 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        display: inline-block;
+      }
+      .days {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+        gap: 21px;
+        margin-top: 30px;
+      }
+      .day {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        cursor: pointer;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+        user-select: none;
+      }
+      .day.checked {
+        background: #4caf50;
+        color: #fff;
+        transform: scale(1.1);
+      }
+      .progress-bar {
+        width: 100%;
+        height: 20px;
+        background: #ddd;
+        border-radius: 10px;
+        margin: 20px auto;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background: #4caf50;
+        width: 0%;
+        transition: width 0.3s;
+      }
+      .controls {
+        text-align: center;
+        margin: 20px;
+      }
+      button {
+        padding: 8px 16px;
+        margin: 5px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #1976d2;
+        color: #fff;
+        font-size: 1rem;
+        transition: background 0.3s;
+      }
+      button:hover {
+        background: #1565c0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>چالش ۱۰۷ روزه</h1>
+    <div class="counter">روز باقی‌مانده: <span id="remaining">107</span></div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+
+    <div class="controls">
+      <button id="undo">↩ بازگردانی آخرین تغییر</button>
+    </div>
+
+    <div class="days" id="days"></div>
+
+    <script>
+      const totalDays = 107;
+      let checkedDays = JSON.parse(localStorage.getItem("checkedDays")) || [];
+      let history = JSON.parse(localStorage.getItem("history")) || [];
+
+      const daysContainer = document.getElementById("days");
+      const remainingEl = document.getElementById("remaining");
+      const progressFill = document.getElementById("progress");
+      const undoBtn = document.getElementById("undo");
+
+      function renderDays() {
+        daysContainer.innerHTML = "";
+        for (let i = 1; i <= totalDays; i++) {
+          const day = document.createElement("div");
+          day.classList.add("day");
+          day.textContent = i;
+
+          if (checkedDays.includes(i)) {
+            day.classList.add("checked");
+          }
+
+          day.addEventListener("click", () => {
+            if (day.classList.contains("checked")) {
+              day.classList.remove("checked");
+              checkedDays = checkedDays.filter((d) => d !== i);
+              history.push({ action: "uncheck", day: i });
+            } else {
+              day.classList.add("checked");
+              checkedDays.push(i);
+              history.push({ action: "check", day: i });
+            }
+            saveData();
+            updateStats();
+          });
+
+          daysContainer.appendChild(day);
+        }
+      }
+
+      function updateStats() {
+        const remaining = totalDays - checkedDays.length;
+        remainingEl.textContent = remaining;
+        const percent = (checkedDays.length / totalDays) * 100;
+        progressFill.style.width = percent + "%";
+      }
+
+      function saveData() {
+        localStorage.setItem("checkedDays", JSON.stringify(checkedDays));
+        localStorage.setItem("history", JSON.stringify(history));
+      }
+
+      undoBtn.addEventListener("click", () => {
+        const lastAction = history.pop();
+        if (!lastAction) return;
+        if (lastAction.action === "check") {
+          checkedDays = checkedDays.filter((d) => d !== lastAction.day);
+        } else if (lastAction.action === "uncheck") {
+          checkedDays.push(lastAction.day);
+        }
+        saveData();
+        renderDays();
+        updateStats();
+      });
+
+      renderDays();
+      updateStats();
+    </script>
+  </body>
+</html>
