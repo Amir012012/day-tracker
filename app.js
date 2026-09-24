@@ -1,4 +1,4 @@
-let totalDays = 110; // تعداد کل روزها
+let totalDays = 155; // تعداد کل روزها
 let checkedDays = JSON.parse(localStorage.getItem("checkedDays")) || [];
 let history = JSON.parse(localStorage.getItem("history")) || [];
 let notes = JSON.parse(localStorage.getItem("notes")) || {};
